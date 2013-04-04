@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p id="demo">Click the button to create an array, then display it's length</p>
+
+<textarea class="code_input" width="100%" height="400px" id="pre_code" wrap="logical">
+</textarea>
+
+<button onclick="myFunction()">Try it</button>
+
+<script>
+function show(x){
+var ret=x+"{";
+for(i in x){
+  ret+= i+"=";
+  ret+= x[i]+", ";
+}
+ret+="}";
+return ret;
+}
+function myFunction(){
+var t= document.getElementById("pre_code").value;
+var res= eval(t);
+var x=document.getElementById("demo");
+x.innerHTML= res;
+}
+</script>
+
+</body>
+</html>
