@@ -2,28 +2,18 @@
 <html>
 <body>
 
-<p id="demo">Click the button to create an array, then display it's length</p>
+<script src="basef.js" type="text/javascript"></script>
 
-<textarea class="code_input" width="100%" height="400px" id="pre_code" wrap="logical">
-</textarea>
+<p id="layout">text_aera</p>
 
-<button onclick="myFunction()">Try it</button>
+<textarea id="code_input" width="100%" height="400px" wrap="logical"></textarea>
+<button onclick="run_click()">Go</button>
 
 <script>
-function show(x){
-var ret=x+"{";
-for(i in x){
-  ret+= i+"=";
-  ret+= x[i]+", ";
-}
-ret+="}";
-return ret;
-}
-function myFunction(){
-var t= document.getElementById("pre_code").value;
-var res= eval(t);
-var x=document.getElementById("demo");
-x.innerHTML= res;
+function run_click(){
+ var t= document.getElementById('code_input').value;
+ var r= run_code(t);
+ document.getElementById("layout").innerHTML= r;
 }
 </script>
 
