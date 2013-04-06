@@ -8,12 +8,17 @@
 
 <textarea id="code_input" width="100%" height="400px" wrap="logical"></textarea>
 <button onclick="run_click()">Go</button>
+<button onclick="render_click()">Render</button>
 
 <script>
 function run_click(){
  var t= document.getElementById('code_input').value;
  var r= run_code(t);
  document.getElementById("layout").innerHTML= r;
+}
+function render_click(){
+ var v= render_curbuffer();
+ document.getElementById("layout").innerHTML= v;
 }
 </script>
 
