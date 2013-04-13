@@ -20,8 +20,7 @@ function escapeHtml(text) {
          .replace(/</g, "&lt;")
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;")
-         .replace(/\n/g, "<br/>");
+         .replace(/'/g, "&#039;");
  }
 //from is array
 function cmf(from, dest, fcollect, fmap, fflip){
