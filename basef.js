@@ -1,3 +1,4 @@
+
 function show(x){
     var ret=x+"{";
     for(i in x){
@@ -19,22 +20,35 @@ function escapeHtml(text) {
          .replace(/</g, "&lt;")
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+         .replace(/'/g, "&#039;")
+         .replace(/\n/g, "<br/>");
  }
+//from is array
 function cmf(from, dest, fcollect, fmap, fflip){
     fcollect= fcollect||function(dest,val){};
     fmap= fmap||function(x){return x;};
     fflip= fflip||function(x){return true;};
     for(i in from){
-	if(fflip(i)){
-	    fcollect(dest,fmap(i));
+	if(fflip(from[i])){
+	    dest= fcollect(dest,fmap(from[i])); // iter with self-copy opt
 	}
     }
     return dest;
 }
 
+function append_arr(r,i){
+    r.push(i);
+    return r;
+}
 
-var dataroot={};
+function concat_string(r,i){
+    return r.concat(i);
+}
+function concat_arr(r,i){
+    return r.concat(i);
+}
+
+dataroot={};
 
 buffer={
     curbuffer:function(){
@@ -53,62 +67,99 @@ buffer={
 vbuf={
     memdata:function(mem){
 	this.mem= mem;
+	this.toString= function(){return "binnary-data";}
 	this.toHtml= function(){
 	    return escapeHtml(this.mem);
 	}
     },
     text:function(txt){
 	this.txt= txt;
+	this.toString= function(){return this.txt;}
 	this.toHtml= function(){
 	    return escapeHtml(this.txt);
 	}
-	this.toString= function(){return this.txt;}
     },
-    split_text:function(vbuf_text,separator){
-	this.token_protype= function(type,val){
-	    this.type= type;
-	    this.val= val;
+
+    html_modify:function(val,name,args){
+	args= args||"";
+	this.item= val;
+	this.toString= function(){
+	    return this.item.toString();
 	}
-	this.get= function(){
-	    return vbuf_text.toString().split(separator||"")
-	};
 	this.toHtml= function(){
-	    var ret="";
-	    escapeHtml(cmf(this.tokens, ret, function(r,i){r+=i;}));
-	    return ret;
+	    return "<"+name+" "+args+">"+this.item.toHtml()+"</"+name+">";
 	}
-    },
-    html_modify:function(){
     },
 };
 pipeline={
-    pipeline_echo:function(){
-	this.render= function(d){
-	    return new vbuf.memdata(d);
+    const_text:function(text){
+	this.name= "const_text";
+	this.text= text;
+	this.transform= function(ignored_arg){
+	    return [this.text];
+	}
+    },
+    split_text:function(separator){
+	separator= separator||"";
+	this.name= "split_text";
+	//split a text to vbuf.text array
+	split_text= function(text,dest){
+	    var sp= text.split(separator);
+	    dest= dest||[];
+	    return cmf(sp, dest, append_arr,
+		       function(i){return new vbuf.text(i);}
+		      );
 	};
+	//concat split_text
+	this.transform= function(arr){
+	    return cmf(arr, [], concat_arr,
+		       function(text){return split_text(text.toString());}
+		      );
+	}
     },
-    render_pipeline:function(pipe,d){
-	var tmp= pipe.render(d);
-	return tmp.toHtml();
-    },
-
-    render_curbuffer:function(){
-	var bf= buffer.get_buffer(buffer.curbuffer());
-	return pipeline.render_pipeline(dataroot.pipeline, bf);
+    red5: function(){
+	this.name= "red5";
+	this.transform= function(arr){
+	    return cmf(arr, [], append_arr,
+		       function(ch){
+			   if(ch.toString()=="5"){
+			       return new vbuf.html_modify(ch,"font", 'color="red"');
+			   }else{
+			       return ch;
+			   }
+		       }
+		      );
+	}
     },
 };
 
+
+//to html
+render_pipeline= function(pipes){
+    var tmp= cmf(pipes, [], 
+		 function(arr,pipe){return pipe.transform(arr);}
+		);
+    return cmf(tmp,"", concat_string,
+	       function(i){return i.toHtml();}
+	      );
+}
+render_curbuffer= function(){
+    return render_pipeline(dataroot.pipeline);
+}
 //--------
 
 function init(){
-    //buffer
-    dataroot.buffers={};
-    dataroot.curbuffer="empty";
-    buffer.alloc_buffer(dataroot.curbuffer);
+    ////buffer
+    //dataroot.buffers={};
+    //dataroot.curbuffer="empty";
+    //buffer.alloc_buffer(dataroot.curbuffer);
 
     //pipeline
-    dataroot.pipeline= new pipeline.pipeline_echo();
+    dataroot.pipeline= [
+	new pipeline.const_text("test red5:  haha 12345678 and 654321"),
+	new pipeline.split_text(""),
+	new pipeline.red5(),
+    ];
 }
 init();
 
-alert("inited");
