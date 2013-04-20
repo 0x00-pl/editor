@@ -35,15 +35,37 @@ function cmf(from, dest, fcollect, fmap, fflip){
     return dest;
 }
 
-function append_arr(r,i){
+function cmf_push(r,i){
     r.push(i);
     return r;
 }
 
-function concat_string(r,i){
-    return r.concat(i);
-}
-function concat_arr(r,i){
+function cmf_concat(r,i){
     return r.concat(i);
 }
 
+var render= {
+    static_hello:function(){
+	this.show=function(){
+	    return {
+		toHtml:function(){
+		    return escapeHtml("hello");
+		}
+	    }
+	};
+    }
+};
+
+var data_root={
+    render_root:null,
+};
+
+function get_render(){
+    var tmp= data_root.render_root();
+    return tmp.toHtml();
+}
+
+function init(){
+    data_root.render_root= (new render.static_hello()).show;
+}
+init();
