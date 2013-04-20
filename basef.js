@@ -1,4 +1,10 @@
 
+function ref(x){
+    this.set=function(y){x=y;};
+    this.get=function(){return x;};
+    this.run=function(f){x=f(x);};
+}
+
 function show(x){
     var ret=x+"{";
     for(i in x){
@@ -23,6 +29,20 @@ function escapeHtml(text) {
          .replace(/'/g, "&#039;");
  }
 //from is array
+
+function cmf_push(r,i){
+    r.push(i);
+    return r;
+}
+function cmf_concat(r,i){
+    return r.concat(i);
+}
+function rcmf_push(ref_r,i){
+    ref_r.run(function(x){return x.push(i);});
+}
+function rcmf_concat(ref_r,i){
+    ref_r.run(function(x){return x.concat(i);});
+}
 function cmf(from, dest, fcollect, fmap, fflip){
     fcollect= fcollect||function(dest,val){};
     fmap= fmap||function(x){return x;};
@@ -34,22 +54,33 @@ function cmf(from, dest, fcollect, fmap, fflip){
     }
     return dest;
 }
-
-function cmf_push(r,i){
-    r.push(i);
-    return r;
-}
-
-function cmf_concat(r,i){
-    return r.concat(i);
+function rcmf(from, ref_dest, fref_collect, fmap, fflip){
+    fref_collect= fref_collect||function(ref_dest,val){};
+    fmap= fmap||function(x){return x;};
+    fflip= fflip||function(x){return true;};
+    for(i in from){
+	if(fflip(from[i])){
+	    fref_collect(dest,fmap(from[i]));
+	}
+    }
+    return dest;
 }
 
 var render= {
+    element:{
+	aconcat:function(x){
+	    this.toHtml=function(){
+		return cmf(x,"", cmfc_concat);
+	    }
+	}
+    },
     static_hello:function(){
+	txt= new ref("hello");
+	this.txt= txt;
 	this.show=function(){
 	    return {
 		toHtml:function(){
-		    return escapeHtml("hello");
+		    return escapeHtml(txt.get());
 		}
 	    }
 	};
