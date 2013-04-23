@@ -1,4 +1,6 @@
 
+function fnil(){}
+
 function ref(x){
     this.set=function(y){x=y;};
     this.get=function(){return x;};
@@ -65,38 +67,3 @@ function rcmf(from, ref_dest, fref_collect, fmap, fflip){
     }
     return dest;
 }
-
-var render= {
-    element:{
-	aconcat:function(x){
-	    this.toHtml=function(){
-		return cmf(x,"", cmfc_concat);
-	    }
-	}
-    },
-    static_hello:function(){
-	txt= new ref("hello");
-	this.txt= txt;
-	this.show=function(){
-	    return {
-		toHtml:function(){
-		    return escapeHtml(txt.get());
-		}
-	    }
-	};
-    }
-};
-
-var data_root={
-    render_root:null,
-};
-
-function get_render(){
-    var tmp= data_root.render_root();
-    return tmp.toHtml();
-}
-
-function init(){
-    data_root.render_root= (new render.static_hello()).show;
-}
-init();
