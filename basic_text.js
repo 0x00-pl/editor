@@ -23,6 +23,41 @@ var basic_text={
 	       );
 	};
     },
+    pipe_token:function(base){
+	var self= this;
+	this.base= base;
+	var is_token_char= function(ch){
+	    return /[a-zA-z0-9_]/.test(ch);
+	}
+	this.render= function(){
+	    var text= cmf(self.base.render(),"",cmf_concat,function(x){return x.text;});
+	    var ret= [];
+	    var last= "";
+	    //ºÏ²¢×Ö·û´® concat to token
+	    //bad-code do-not-write-code-like-this
+	    for(var i in text){
+		if(is_token_char(text[i])){
+		    last+=text[i];
+		}else{
+		    if(last!=""){
+			ret.push(new basic_text.render_item.text(last));
+			last= "";
+		    }
+		    ret.push(new basic_text.render_item.text(text[i]));
+		}
+	    }
+	    if(last!=""){
+		ret.push(new basic_text.render_item.text(last));
+	    }
+	    return ret;
+	};
+	this.update_listener= [];
+	this.update= function(x){
+	    cmf(update_listener, null, 
+		function(c,i){(i.update||fnil)(self);}
+	       );
+	};
+    },
     pipe_tag:function(base){
 	var this_pipe= this;
 	this.base= base;
@@ -68,9 +103,10 @@ function get_render(){
 function init_hello(){
     var tx= new basic_text.pipe_text();
     tx.text= "hello world !!!";
+    var ttk= new basic_text.pipe_token(tx);
 //need split
-    var redl= new basic_text.pipe_tag(tx);
-    redl.item.push(redl.make_item(function(x){return x.text=="l";},"a","color='red'"));
+    var redl= new basic_text.pipe_tag(ttk);
+    redl.item.push(redl.make_item(function(x){return x.text=="world";},"a","class=red"));
     data_root.render_root= redl.render;
 }
 
