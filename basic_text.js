@@ -29,8 +29,7 @@ var basic_text={
 	var is_token_char= function(ch){
 	    return /[a-zA-z0-9_]/.test(ch);
 	}
-	this.render= function(){
-	    var text= cmf(self.base.render(),"",cmf_concat,function(x){return x.text;});
+	var token_from_text= function(text){
 	    var ret= [];
 	    var last= "";
 	    //ºÏ²¢×Ö·û´® concat to token
@@ -51,6 +50,15 @@ var basic_text={
 	    }
 	    return ret;
 	};
+	this.render= function(){
+	    return cmf(self.base.render(),[],cmf_concat,function(x){
+		if(x.text){
+		    return token_from_text(x.text);
+		}else{
+		    return [x];
+		}
+	    });
+	}
 	this.update_listener= [];
 	this.update= function(x){
 	    cmf(update_listener, null, 
