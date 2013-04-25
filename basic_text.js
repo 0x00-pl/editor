@@ -7,10 +7,22 @@ var basic_text={
 	    this.text= text;
 	    this.toHtml= function(){return escapeHtml(self.text);};
 	},
+	arr:function(its,prefix_Html,split_Html,end_Html){
+	    var self= this;
+	    this.item= its||[];
+	    this.prefix_Html= prefix_Html||"";
+	    this.split_Html= split_Html||"";
+	    this.end_Html= end_Html||"";
+	    this.toHtml= function(){
+		return self.prefix_Html+
+		    cmf(self.item,"",cmf_concat,function(x){return x.toHtml() + self.split_Html;})+
+		    self.end_Html;
+	    };
+	},
 	Html_tag:function(typ,val,subit){
 	    this.text= subit.text;
 	    this.toHtml= function(){return "<"+typ+" "+val+">"+subit.toHtml()+"</"+typ+">";};
-	}
+	},
     },
     pipe_text:function(text){
 	var self= this;
@@ -84,10 +96,10 @@ var basic_text={
 		    return render_it;
 		}
 	    });
-	}
+	};
 	this.render=function(){
 	    return cmf(this_pipe.base.render(),[], cmf_push, function(x){return translate(x);});
-	}
+	};
 	this.update_listener=[];
 	this.update=function(b){
 	    this_pipe.base=b;
@@ -97,7 +109,46 @@ var basic_text={
 	       );
 	};
     },
-
+    pipe_lines:function(base){
+	var self= this;
+	this.base= base;
+	if(base.update_listener){
+	    base.update_listener.push(this);
+	}
+	this.render= function(){
+	    var curline=[];
+	    var find_n= /\n|\r\n/;
+	    var ret= cmf(self.base.render(),[],function(lines,rdobj){
+		if(rdobj.text && find_n.test(rdobj.text)){
+		    var texts= rdobj.text.split(find_n);
+		    var last_text= texts.pop();
+		    //push lines
+		    curline= cmf(texts,curline,function(cl,str){
+			cl.push(new basic_text.render_item.text(str));
+			lines.push(new basic_text.render_item.arr(cl,"<p>","","</p>"));
+			return [];
+		    });
+		    curline= [new basic_text.render_item.text(last_text)];
+		}else{
+		    curline.push(rdobj);
+		}
+		return lines;
+	    });
+	    //push last_line
+	    if(curline.length!=0){
+		ret.push(new basic_text.render_item.arr(curline,"<p>","","</p>"));
+	    }
+	    return ret;
+	};
+	this.update_listener=[];
+	this.update=function(b){
+	    this_pipe.base=b;
+	    this_pipe.text=b.text;
+	    cmf(update_listener, null, 
+		function(c,i){(i.update||fnil)(this_pipe);}
+	       );
+	};
+    },
 };
 var data_root={
     render_root:null,
@@ -110,12 +161,16 @@ function get_render(){
 
 function init_hello(){
     var tx= new basic_text.pipe_text();
-    tx.text= "hello world !!!";
+    tx.text= "hello world !!! \n next_hello world!!!";
+
     var ttk= new basic_text.pipe_token(tx);
-//need split
+
     var redl= new basic_text.pipe_tag(ttk);
     redl.item.push(redl.make_item(function(x){return x.text=="world";},"a","class=red"));
-    data_root.render_root= redl.render;
+
+    var les= new basic_text.pipe_lines(redl);
+
+    data_root.render_root= les.render;
 }
 
 function init(){
