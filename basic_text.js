@@ -125,7 +125,7 @@ var basic_text={
 		    //push lines
 		    curline= cmf(texts,curline,function(cl,str){
 			cl.push(new basic_text.render_item.text(str));
-			lines.push(new basic_text.render_item.arr(cl,"<p>","","</p>"));
+			lines.push(new basic_text.render_item.arr(cl,"","","<br/>"));
 			return [];
 		    });
 		    curline= [new basic_text.render_item.text(last_text)];
@@ -136,7 +136,7 @@ var basic_text={
 	    });
 	    //push last_line
 	    if(curline.length!=0){
-		ret.push(new basic_text.render_item.arr(curline,"<p>","","</p>"));
+		ret.push(new basic_text.render_item.arr(curline,"","","<br/>"));
 	    }
 	    return ret;
 	};
