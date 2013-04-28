@@ -6,6 +6,7 @@ var basic_text={
 	    var self= this;
 	    this.text= text;
 	    this.toHtml= function(){return escapeHtml(self.text);};
+	    this.modify_dom= function(dom){dom.innerHTML+= self.toHtml();}; 
 	},
 	arr:function(its,prefix_Html,split_Html,end_Html){
 	    var self= this;
@@ -18,16 +19,56 @@ var basic_text={
 		    cmf(self.item,"",cmf_concat,function(x){return x.toHtml() + self.split_Html;})+
 		    self.end_Html;
 	    };
+	    this.modify_dom= function(dom){
+		dom.innerHTML+= self.prefix_Html;
+		cmf(self.item,null,function(ignore,i){
+		    i.modify_dom(dom);
+		    dom.innerHTML+= self.split_Html;
+		});
+		dom.innerHTML+= self.end_Html;
+	    }; 
 	},
 	Html_tag:function(typ,val,subit){
-	    this.text= subit.text;
-	    this.toHtml= function(){return "<"+typ+" "+val+">"+subit.toHtml()+"</"+typ+">";};
+	    if(subit) this.text= subit.text;
+	    this.toHtml= function(){
+		var subitht="";
+		if(subit) subitht= subit.toHtml();
+		return "<"+typ+" "+cmf(val,"",cmf_concat,function(i,k){return k+"="+i+" ";})+">"+
+		    subitht+
+		    "</"+typ+">";
+	    };
+	    this.modify_dom= function(dom){
+		var tag_dom= document.createElement(typ);
+		cmf(val,null,function(ignore,i){
+		    tag_dom.setAttribute(i,val[i]);
+		});
+		if(subit)subit.modify_dom(tag_dom);
+	    }; 
 	},
     },
     pipe_text:function(text){
 	var self= this;
 	this.text= text;
 	this.render= function(){return [new basic_text.render_item.text(self.text)];};
+	this.update_listener= [];
+	this.update= function(x){
+	    cmf(update_listener, null, 
+		function(c,i){(i.update||fnil)(self);}
+	       );
+	};
+    },
+    pipe_cursor_text:function(base_pipe_text){
+	var self= this;
+	this.base= base_pipe_text;
+	this.base.update_listener.push(this);
+	this.pos= 0;
+	this.render= function(){
+	    return [
+		new basic_text.render_item.text(self.base.text.substring(0,self.pos)),
+		new basic_text.render_item.Html_tag("input",{"class":"cursor"}),
+		new basic_text.render_item.text(self.base.text.substring(self.pos,self.base.text.length))
+	    ]
+	};
 	this.update_listener= [];
 	this.update= function(x){
 	    cmf(update_listener, null, 
@@ -162,11 +203,12 @@ function get_render(){
 function init_hello(){
     var tx= new basic_text.pipe_text();
     tx.text= "hello world !!! \n next_hello world!!!";
+    var txc= new basic_text.pipe_cursor_text(tx);
 
-    var ttk= new basic_text.pipe_token(tx);
+    var ttk= new basic_text.pipe_token(txc);
 
     var redl= new basic_text.pipe_tag(ttk);
-    redl.item.push(redl.make_item(function(x){return x.text=="world";},"a","class=red"));
+    redl.item.push(redl.make_item(function(x){return x.text=="world";},"a",{"class":"red"}));
 
     var les= new basic_text.pipe_lines(redl);
 
