@@ -47,11 +47,11 @@ function rcmf_concat(ref_r,i){
 }
 function cmf(from, dest, fcollect, fmap, fflip){
     fcollect= fcollect||function(dest,val){};
-    fmap= fmap||function(x){return x;};
+    fmap= fmap||function(x,key){return x;};
     fflip= fflip||function(x){return true;};
     for(i in from){
 	if(fflip(from[i])){
-	    dest= fcollect(dest,fmap(from[i])); // iter with self-copy opt
+	    dest= fcollect(dest,fmap(from[i],i)); // iter with self-copy opt
 	}
     }
     return dest;
