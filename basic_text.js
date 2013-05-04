@@ -29,7 +29,6 @@ var basic_text={
 	    }; 
 	},
 	Html_tag:function(typ,val,subit){
-	    if(subit) this.text= subit.text;
 	    this.toHtml= function(){
 		var subitht="";
 		if(subit) subitht= subit.toHtml();
@@ -43,6 +42,7 @@ var basic_text={
 		    tag_dom.setAttribute(i,val[i]);
 		});
 		if(subit)subit.modify_dom(tag_dom);
+		dom.addElement(tag_dom);
 	    }; 
 	},
     },
@@ -65,8 +65,8 @@ var basic_text={
 	this.render= function(){
 	    return [
 		new basic_text.render_item.text(self.base.text.substring(0,self.pos)),
-		new basic_text.render_item.Html_tag("input",{"class":"cursor"}),
-		new basic_text.render_item.text(self.base.text.substring(self.pos,self.base.text.length))
+		new basic_text.render_item.Html_tag("a",{"class":"red"},new basic_text.render_item.text("|")),
+		new basic_text.render_item.text(self.base.text.substring(self.pos,self.base.text.length)),
 	    ]
 	};
 	this.update_listener= [];
@@ -85,7 +85,7 @@ var basic_text={
 	var token_from_text= function(text){
 	    var ret= [];
 	    var last= "";
-	    //ºÏ²¢×Ö·û´® concat to token
+	    //concat to token
 	    //bad-code do-not-write-code-like-this
 	    for(var i in text){
 		if(is_token_char(text[i])){
