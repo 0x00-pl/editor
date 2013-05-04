@@ -34,12 +34,6 @@ function cmf_push(r,i){
 function cmf_concat(r,i){
     return r.concat(i);
 }
-function rcmf_push(ref_r,i){
-    ref_r.run(function(x){return x.push(i);});
-}
-function rcmf_concat(ref_r,i){
-    ref_r.run(function(x){return x.concat(i);});
-}
 function cmf(from, dest, fcollect, fmap, fflip){
     fcollect= fcollect||function(dest,val){};
     fmap= fmap||function(x,key){return x;};
@@ -50,4 +44,20 @@ function cmf(from, dest, fcollect, fmap, fflip){
 	}
     }
     return dest;
+}
+
+function mr_push(r,i){
+    r.push(i);
+    return r;
+}
+function mr_concat(r,i){
+    return r.concat(i);
+}
+function mr(dst,src,freduce,fmap){
+    freduce= freduce||function(collect,val){return collect;};
+    fmap= fmap||function(val,key){return val;}
+    for(key in src){
+	dst= freduce(dst, fmap(src[key],key));
+    }
+    return dst;
 }
