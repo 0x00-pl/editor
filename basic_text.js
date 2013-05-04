@@ -44,7 +44,7 @@ var basic_text={
 	var token_from_text= function(text){
 	    var ret= [];
 	    var last= "";
-	    //ºÏ²¢×Ö·û´® concat to token
+	    //concat to token
 	    //bad-code do-not-write-code-like-this
 	    for(var i in text){
 		if(is_token_char(text[i])){
