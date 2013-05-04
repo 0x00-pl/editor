@@ -1,19 +1,14 @@
 
 function fnil(){}
 
-function ref(x){
-    this.set=function(y){x=y;};
-    this.get=function(){return x;};
-    this.run=function(f){x=f(x);};
-}
-
 function show(x){
     var ret=x+"{";
     for(i in x){
 	ret+= i+"=";
-	ret+= x[i]+", ";
+	ret+= show(x[i])+", ";
     }
     ret+="}";
+
     return ret;         
 }
 
@@ -52,17 +47,6 @@ function cmf(from, dest, fcollect, fmap, fflip){
     for(i in from){
 	if(fflip(from[i])){
 	    dest= fcollect(dest,fmap(from[i],i)); // iter with self-copy opt
-	}
-    }
-    return dest;
-}
-function rcmf(from, ref_dest, fref_collect, fmap, fflip){
-    fref_collect= fref_collect||function(ref_dest,val){};
-    fmap= fmap||function(x){return x;};
-    fflip= fflip||function(x){return true;};
-    for(i in from){
-	if(fflip(from[i])){
-	    fref_collect(dest,fmap(from[i]));
 	}
     }
     return dest;
