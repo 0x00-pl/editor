@@ -53,6 +53,16 @@ function mr_push(r,i){
 function mr_concat(r,i){
     return r.concat(i);
 }
+function mr_mkcond(cond){
+    cond= cond||function(val){return true;}
+    return function(collect,val){
+	if(cond(val)){
+	    return collect.push(val);
+	}else{
+	    return collect;
+	}
+    };
+}
 function mr(dst,src,freduce,fmap){
     freduce= freduce||function(collect,val){return collect;};
     fmap= fmap||function(val,key){return val;}
